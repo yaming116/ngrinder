@@ -58,10 +58,10 @@ abstract public class AbstractMultiGrinderTestBase {
 		agentConfig1.init();
 		ArchLoaderInit archLoaderInit = new ArchLoaderInit();
 		archLoaderInit.init(agentConfig1.getHome().getNativeDirectory());
-		agentConfig2 = new AgentConfig.NullAgentConfig(1);
+		agentConfig2 = new AgentConfig.NullAgentConfig(2);
 		agentConfig2.init();
 		archLoaderInit.init(agentConfig2.getHome().getNativeDirectory());
-		agentConfig3 = new AgentConfig.NullAgentConfig(1);
+		agentConfig3 = new AgentConfig.NullAgentConfig(3);
 		agentConfig3.init();
 		archLoaderInit.init(agentConfig3.getHome().getNativeDirectory());
 	}
