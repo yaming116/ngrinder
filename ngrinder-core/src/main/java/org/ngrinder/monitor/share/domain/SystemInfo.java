@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
@@ -9,7 +9,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  */
 package org.ngrinder.monitor.share.domain;
 
@@ -60,15 +60,15 @@ public class SystemInfo extends MonitorInfo implements Serializable {
 
 	protected BandWidth bandWidth;
 
-	private long totalCpuValue;
-
-	private long idleCpuValue;
+//	private long totalCpuValue;
+//
+//	private long idleCpuValue;
 
 	private long freeMemory;
 
 	private long totalMemory;
 
-	private float cpuUsedPercentage;
+	private double cpuUsedPercentage;
 
 	private String ip;
 
@@ -84,8 +84,8 @@ public class SystemInfo extends MonitorInfo implements Serializable {
 			setCollectTime(collectTime);
 			String string = getString(cd, "system");
 			this.system = System.valueOf(string);
-			this.totalCpuValue = getLong(cd, "totalCpuValue");
-			this.idleCpuValue = getLong(cd, "idleCpuValue");
+//			this.totalCpuValue = getLong(cd, "totalCpuValue");
+//			this.idleCpuValue = getLong(cd, "idleCpuValue");
 			this.freeMemory = getLong(cd, "freeMemory");
 			this.totalMemory = getLong(cd, "totalMemory");
 			this.cpuUsedPercentage = getFloat(cd, "cpuUsedPercentage");

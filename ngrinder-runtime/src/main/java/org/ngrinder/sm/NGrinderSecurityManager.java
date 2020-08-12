@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
@@ -9,7 +9,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  */
 package org.ngrinder.sm;
 
@@ -164,7 +164,8 @@ public class NGrinderSecurityManager extends SecurityManager {
 			if ("setSecurityManager".equals(permissionName)) {
 				processSetSecurityManagerAction();
 			}
-		} else if (permission instanceof java.security.UnresolvedPermission) {
+		}
+		else if (permission instanceof java.security.UnresolvedPermission) {
 			throw new SecurityException("java.security.UnresolvedPermission is not allowed.");
 		} else if (permission instanceof java.awt.AWTPermission) {
 			throw new SecurityException("java.awt.AWTPermission is not allowed.");
@@ -172,10 +173,6 @@ public class NGrinderSecurityManager extends SecurityManager {
 			throw new SecurityException("javax.security.auth.AuthPermission is not allowed.");
 		} else if (permission instanceof javax.security.auth.PrivateCredentialPermission) {
 			throw new SecurityException("javax.security.auth.PrivateCredentialPermission is not allowed.");
-		} else if (permission instanceof javax.security.auth.kerberos.DelegationPermission) {
-			throw new SecurityException("javax.security.auth.kerberos.DelegationPermission is not allowed.");
-		} else if (permission instanceof javax.security.auth.kerberos.ServicePermission) {
-			throw new SecurityException("javax.security.auth.kerberos.ServicePermission is not allowed.");
 		} else if (permission instanceof javax.sound.sampled.AudioPermission) {
 			throw new SecurityException("javax.sound.sampled.AudioPermission is not allowed.");
 		}

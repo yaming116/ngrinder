@@ -45,7 +45,7 @@ public class SystemDataModel extends BaseEntity<SystemDataModel> {
 
 	private long totalMemory;
 
-	private float cpuUsedPercentage;
+	private double cpuUsedPercentage;
 
 	private long receivedPerSec;
 

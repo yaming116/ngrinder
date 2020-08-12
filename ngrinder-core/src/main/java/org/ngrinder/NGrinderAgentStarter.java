@@ -15,29 +15,28 @@ package org.ngrinder;
 
 import com.beust.jcommander.JCommander;
 import net.grinder.AgentControllerDaemon;
-import net.grinder.util.NetworkUtils;
 import net.grinder.util.VersionNumber;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hyperic.sigar.ProcState;
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
 import org.ngrinder.common.constants.AgentConstants;
 import org.ngrinder.common.constants.CommonConstants;
 import org.ngrinder.infra.AgentConfig;
-import org.ngrinder.infra.ArchLoaderInit;
 import org.ngrinder.monitor.agent.MonitorServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import oshi.software.os.OSProcess;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import static java.lang.Integer.parseInt;
 import static net.grinder.util.NetworkUtils.getIP;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.ngrinder.common.constants.InternalConstants.PROP_INTERNAL_NGRINDER_VERSION;
-import static org.ngrinder.common.util.NoOp.noOp;
+import static org.ngrinder.common.util.SystemInfoUtils.*;
 
 /**
  * Main class to start agent or monitor.
@@ -64,11 +63,11 @@ public class NGrinderAgentStarter implements AgentConstants, CommonConstants {
 	public void init() {
 		// Check agent start mode
 		this.agentConfig = createAgentConfig();
-		try {
-			new ArchLoaderInit().init(agentConfig.getHome().getNativeDirectory());
-		} catch (Exception e) {
-			LOG.error("Error while expanding native lib", e);
-		}
+//		try {
+//			new ArchLoaderInit().init(agentConfig.getHome().getNativeDirectory());
+//		} catch (Exception e) {
+//			LOG.error("Error while expanding native lib", e);
+//		}
 	}
 
 	protected AgentConfig createAgentConfig() {
@@ -194,7 +193,7 @@ public class NGrinderAgentStarter implements AgentConstants, CommonConstants {
 		modeParam.parse(unknownOptions.toArray(new String[unknownOptions.size()]));
 
 		if (modeParam.version != null) {
-			System.out.println("nGrinder v" + getStaticVersion());
+			LOG.info("nGrinder v" + getStaticVersion());
 			return;
 		}
 
@@ -209,7 +208,7 @@ public class NGrinderAgentStarter implements AgentConstants, CommonConstants {
 		final String startMode = modeParam.name();
 		if ("stop".equalsIgnoreCase(param.command)) {
 			starter.stopProcess(startMode);
-			System.out.println("Stop the " + startMode);
+			LOG.info("Stop the " + startMode);
 			return;
 		}
 		starter.checkDuplicatedRun(startMode);
@@ -254,16 +253,15 @@ public class NGrinderAgentStarter implements AgentConstants, CommonConstants {
 	 */
 	protected void stopProcess(String mode) {
 		String pid = agentConfig.getAgentPidProperties(mode);
-		try {
-			if (StringUtils.isNotBlank(pid)) {
-				new Sigar().kill(pid, 15);
+		if (isNotBlank(pid)) {
+			List<String> result = killProcess(parseInt(pid));
+			if (result.isEmpty()) {
+				printHelpAndExit(String.format("Error occurred while terminating %s process.\n"
+						+ "It can be already stopped or you may not have the permission.\n"
+						+ "If everything is OK. Please stop it manually.", mode));
 			}
-			agentConfig.updateAgentPidProperties(mode);
-		} catch (SigarException e) {
-			printHelpAndExit(String.format("Error occurred while terminating %s process.\n"
-					+ "It can be already stopped or you may not have the permission.\n"
-					+ "If everything is OK. Please stop it manually.", mode), e);
 		}
+		agentConfig.updateAgentPidProperties(mode);
 	}
 
 	/**
@@ -272,24 +270,17 @@ public class NGrinderAgentStarter implements AgentConstants, CommonConstants {
 	 * @param startMode monitor or agent
 	 */
 	public void checkDuplicatedRun(String startMode) {
-		Sigar sigar = new Sigar();
-		String existingPid = this.agentConfig.getAgentPidProperties(startMode);
-		if (StringUtils.isNotEmpty(existingPid)) {
-			try {
-				ProcState procState = sigar.getProcState(existingPid);
-				if (procState.getState() == ProcState.RUN || procState.getState() == ProcState.IDLE
-						|| procState.getState() == ProcState.SLEEP) {
-					printHelpAndExit("Currently " + startMode + " is running with pid " + existingPid
-							+ ". Please stop it before run");
-				}
-				agentConfig.updateAgentPidProperties(startMode);
-			} catch (SigarException e) {
-				noOp();
+		String existingPid = agentConfig.getAgentPidProperties(startMode);
+		if (isNotEmpty(existingPid)) {
+			OSProcess process = getProcess(parseInt(existingPid));
+			if (process != null) {
+				printHelpAndExit("Currently " + startMode + " is running with pid " + existingPid
+					+ ". Please stop it before run");
 			}
+			agentConfig.updateAgentPidProperties(startMode);
 		}
-		this.agentConfig.saveAgentPidProperties(String.valueOf(sigar.getPid()), startMode);
+		agentConfig.saveAgentPidProperties(String.valueOf(getPid()), startMode);
 	}
-
 
 	/**
 	 * Print help and exit. This is provided for mocking.
